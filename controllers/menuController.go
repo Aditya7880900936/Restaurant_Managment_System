@@ -86,13 +86,17 @@ func CreateMenu() gin.HandlerFunc {
 	}
 }
 
+func inTimeSpan(start, end, check time.Time) bool {
+	return start.After(time.Now()) && end.After(start)
+}
+
 func UpdateMenu() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 
 		var menu models.Menu
 
-		if err := c.BindJSON(&menu); err!= nil {
+		if err := c.BindJSON(&menu); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -103,7 +107,7 @@ func UpdateMenu() gin.HandlerFunc {
 
 		var updateObj primitive.D
 
-		if menu.Start_Date!= nil && menu.End_Date!= nil {
+		if menu.Start_Date != nil && menu.End_Date != nil {
 			if !inTimeSpan(*menu.Start_Date, *menu.End_Date, time.Now()) {
 				msg := "Kindly retype the time"
 				c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
@@ -114,7 +118,7 @@ func UpdateMenu() gin.HandlerFunc {
 			updateObj = append(updateObj, bson.E{"start_date", menu.Start_Date})
 			updateObj = append(updateObj, bson.E{"end_date", menu.End_Date})
 
-			if menu.Name!= "" {
+			if menu.Name != "" {
 				updateObj = append(updateObj, bson.E{"name", menu.Name})
 			}
 
@@ -140,7 +144,7 @@ func UpdateMenu() gin.HandlerFunc {
 				&opt,
 			)
 
-			if err!= nil {
+			if err != nil {
 				msg := "Menu update failed"
 				c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 				return
