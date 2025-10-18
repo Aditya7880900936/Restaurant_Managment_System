@@ -5,6 +5,7 @@ import (
 
 	"github.com/Aditya7880900936/Restaurant_Managment_System/database"
 	"github.com/Aditya7880900936/Restaurant_Managment_System/middlewares"
+	routes "github.com/Aditya7880900936/Restaurant_Managment_System/routes"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,14 +19,14 @@ func main() {
 	}
 	router := gin.New()
 	router.Use(gin.Logger())
-    router.UserRoutes(router)
+    routes.UserRoutes(router) // commented out – no such method on *gin.Engine
 	router.Use(middlewares.Authentication())
-	router.FoodRoutes(router)
-	router.InvoiceRoutes(router)
-	router.MenuRoutes(router)
-	router.OrderItemRoutes(router)
-	router.OrderRoutes(router)
-	router.TableRoutes(router)
+	routes.FoodRoutes(router)
+	routes.InvoiceRoutes(router)
+	routes.MenuRoutes(router)
+	routes.OrderItemRoutes(router)
+	routes.OrderRoutes(router)
+	routes.TableRoutes(router)
 
 	router.Run(":" + port)
 }
