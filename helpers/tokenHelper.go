@@ -15,10 +15,11 @@ import (
 )
 
 type SignedDetails struct {
-	Email      string
-	First_name string
-	Last_name  string
-	Uid        string
+	Email       string
+	First_name  string
+	Last_name   string
+	Uid         string
+	User_Type   string
 	jwt.StandardClaims
 }
 
@@ -26,25 +27,31 @@ var userCollection *mongo.Collection = database.OpenCollection(database.Client, 
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
-func GenerateAllTokens(email string, firstname string, lastname string, uid string) (signedToken string, signedRefreshToken string, err error) {
+func GenerateAllTokens(email string, firstname string, lastname string, uid string, userType string) (signedToken string, signedRefreshToken string, err error) {
 	claims := &SignedDetails{
 		Email:      email,
 		First_name: firstname,
 		Last_name:  lastname,
 		Uid:        uid,
+		User_Type:  userType, // Add this field in your struct too
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
+			ExpiresAt: time.Now().Local().Add(time.Hour * 24).Unix(),
 		},
 	}
+
 	refreshClaims := &SignedDetails{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
+			ExpiresAt: time.Now().Local().Add(time.Hour * 168).Unix(),
 		},
 	}
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
+	if err != nil {
+		log.Panic(err)
+		return
+	}
 
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 		return
@@ -52,6 +59,7 @@ func GenerateAllTokens(email string, firstname string, lastname string, uid stri
 
 	return token, refreshToken, err
 }
+
 
 func UpdateAllTokens(signedToken string, signedRefreshToken string, uid string) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)

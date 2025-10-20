@@ -19,4 +19,5 @@ type User struct {
 	Created_At    time.Time          `json:"created_at"`
 	Updated_At    time.Time          `json:"updated_at"`
 	User_id       string             `json:"user_id"`
+	User_Type     *string             `json:"user_type" validate:"required,eq=ADMIN|eq=USER"`
 }

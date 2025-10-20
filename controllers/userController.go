@@ -114,7 +114,7 @@ func Signup() gin.HandlerFunc {
 		user.Updated_At, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		user.ID = primitive.NewObjectID()
 		user.User_id = user.ID.Hex()
-		token, refreshToken, _ := helpers.GenerateAllTokens(*user.Email, *user.First_Name, *user.Last_Name, *user.User_id, user.User_Type)
+		token, refreshToken, _ := helpers.GenerateAllTokens(*user.Email, *user.First_Name, *user.Last_Name, user.User_id, *user.User_Type)
 		user.Token = &token
 		user.Refresh_Token = &refreshToken
 
@@ -159,7 +159,7 @@ func Login() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
 		}
 
-		token, refreshToken, _ := helpers.GenerateAllTokens(*foundUser.Email, *foundUser.First_Name, *foundUser.Last_Name, *foundUser.User_id, foundUser.User_Type)
+		token, refreshToken, _ := helpers.GenerateAllTokens(*foundUser.Email, *foundUser.First_Name, *foundUser.Last_Name, foundUser.User_id, *foundUser.User_Type)
 		helpers.UpdateAllTokens(token, refreshToken, foundUser.User_id)
 		err = userCollection.FindOne(ctx, bson.M{"user_id": foundUser.User_id}).Decode(&foundUser)
 
@@ -175,7 +175,7 @@ func Login() gin.HandlerFunc {
 func HashPassword(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	password = string(hashedPassword)
-	if err!= nil {
+	if err != nil {
 		log.Panic(err)
 	}
 	return string(password)
@@ -186,7 +186,7 @@ func VerifyPassword(userPassword string, providedPassword string) (bool, string)
 	check := true
 	msg := ""
 
-	if err!= nil {
+	if err != nil {
 		msg = "login or password is incorrect"
 		check = false
 	}
