@@ -173,7 +173,8 @@ func Login() gin.HandlerFunc {
 }
 
 func HashPassword(password string) string {
-	password, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	password = string(hashedPassword)
 	if err!= nil {
 		log.Panic(err)
 	}
